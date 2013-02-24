@@ -17,13 +17,13 @@ import sys
 import urllib.request
 
 import bs4
-from ui import ui_main
 from PyQt4.QtGui import (QApplication, QWidget, QMainWindow, QFileDialog,
                          QMessageBox)
 from PyQt4.QtCore import QFile, QFileInfo, QTextStream, QIODevice, QEventLoop
 from PyQt4 import QtCore, QtNetwork
 from PyQt4.QtNetwork import QNetworkReply
 
+from ui import ui_main
 import content_scraper
 import info_gen
 
@@ -141,14 +141,6 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
 
         out_file.write(reply.readAll())
         reply.deleteLater()
-
-
-
-        # self.replies.remove(reply)
-
-
-
-
 
 
 app = QApplication(sys.argv)
