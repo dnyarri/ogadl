@@ -20,8 +20,9 @@ import bs4
 from ui import ui_main
 from PyQt4.QtGui import (QApplication, QWidget, QMainWindow, QFileDialog,
                          QMessageBox)
-from PyQt4.QtCore import QFile, QTextStream
+from PyQt4.QtCore import QFile, QFileInfo, QTextStream, QIODevice, QEventLoop
 from PyQt4 import QtCore, QtNetwork
+from PyQt4.QtNetwork import QNetworkReply
 
 import content_scraper
 
@@ -39,20 +40,24 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         self.sites = {}
         self.active_site = None
         self.setupUi(self)
+        self.manager = QtNetwork.QNetworkAccessManager()
+        self.replies = []
+        self.current_path = None
         self.setup_signal_slots()
 
 
     def setup_signal_slots(self):
         self.btn_get.clicked.connect(self.get)
         self.btn_download.clicked.connect(self.download_selected)
+        # self.manager.finished[QNetworkReply].connect(self.download_finished)
 
     def clear(self):
         pass
 
     def get(self):
-        site_var = self.scraper.read_data(self.linein_url.text())
-        self.sites[site_var.title] = site_var
-        self.active_site = site_var
+        site = self.scraper.read_data(self.linein_url.text())
+        self.sites[site.title] = site
+        self.active_site = site
 
         self.lbl_title.setText(self.active_site.get_title())
         self.lbl_author.setText(self.active_site.get_author())
@@ -63,34 +68,84 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         for f in self.active_site.get_files().keys():
             self.list_files.addItem(f)
 
-        # TODO: Enable this stuff later
-
-        # path = QFileDialog.getExistingDirectory(self, caption='Choose save folder',
-        #                                         directory='.')
-        # if path:
-        #     info_file = QtCore.QFile(path + "/info")
-        #     if not info_file.open(QFile.WriteOnly | QFile.Text):
-        #         QMessageBox.information(self, self.tr("Something"),
-        #                                 self.tr("Could not open or create info"
-        #                                 "file for editing"))
-        #         info_file = None
-        #     else:
-        #         out = QTextStream(info_file)
-        #         out << "Title: " << scraper.get_title() \
-        #             << "\nAuthor: " << scraper.get_author() \
-        #             << "\nArt type: " << scraper.get_art_type_string()
-        # else:
-        #     print(path)
-        # # self.lbl_content_info.setText(content_info)
-
     def download_selected(self):
-        """ Download selected files
+        """
         """
         selected = self.list_files.selectedItems()
         selected = [selection.text() for selection in selected]
-        # print("Selected", selected)
+
         urls = [self.active_site.get_files()[sel] for sel in selected]
-        # print(urls)
+
+
+        # TODO: Enable this stuff later
+
+        self.current_path = QFileDialog.getExistingDirectory(self,
+                                                             caption='Choose save folder',
+                                                             directory='.')
+        if self.current_path:
+            info_file = QFile(self.current_path + "/info")
+            if not info_file.open(QFile.WriteOnly | QFile.Text):
+                QMessageBox.information(self, self.tr("Something"),
+                                        self.tr("Could not open or create info"
+                                        "file for editing"))
+                info_file = None
+            else:
+                # out = QTextStream(info_file)
+                # out << "Title: " << scraper.get_title() \
+                #     << "\nAuthor: " << scraper.get_author() \
+                #     << "\nArt type: " <<
+                #     scraper.get_art_type_string()
+                pass
+        else:
+            print(self.current_path)
+
+
+
+        print(urls)
+        for url in urls:
+
+
+            request = QtNetwork.QNetworkRequest(url)
+            reply = self.manager.get(request)
+            # self.replies.append(reply)
+            # loop = QEventLoop()
+            reply.finished.connect(self.download_finished)
+            # loop.exec_()
+
+            # TODO: Add signal for error cases
+
+
+    def download_finished(self):
+        """
+        """
+        reply = self.sender()
+        if reply.error():
+            print("Download failed. Error string:\n", reply.errorString())
+        print("Download finished! Reply:", reply)
+        file_info = QFileInfo(reply.url().path())
+        file_name = file_info.fileName()
+        file_path = self.current_path + '/' + file_name
+        out_file = QFile(file_path)
+        print("Path:", file_path)
+        if QFile.exists(file_name):
+            print("File exists")
+            # TODO: Add better notification
+            out_file = QFile(file_name)
+        if not out_file.open(QIODevice.WriteOnly):
+            out_file = None
+            print("Failed to open file")
+            # TODO: Add better notification
+
+        out_file.write(reply.readAll())
+        reply.deleteLater()
+
+
+
+        # self.replies.remove(reply)
+
+
+
+
 
 
 app = QApplication(sys.argv)

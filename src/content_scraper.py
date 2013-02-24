@@ -16,6 +16,7 @@
 import urllib.request
 
 import bs4
+from PyQt4.QtCore import QUrl
 
 import oga_site
 
@@ -50,37 +51,36 @@ class ContentScraper(object):
         soup = bs4.BeautifulSoup(page)
         content_div = soup.find('div', id='block-system-main')
 
-        site_var = oga_site.ContentSite(url)
+        site = oga_site.ContentSite(url)
 
         title_div = content_div.find('div', {'property': 'dc:title'})
-        site_var.title = title_div.contents[0].string
+        site.title = title_div.contents[0].string
 
         span_username = content_div.find('span', {'class': 'username'})
-        site_var.author = span_username.contents[0].string
+        site.author = span_username.contents[0].string
 
         # TODO: Add compatibility code for texture-pages
         art_type_div = content_div.find('div',
                                         {'class': 'field-name-field-art-type'})
-        site_var.art_type_string = art_type_div.select('div > div > a')[0].string
-        site_var.art_type = self._match_string_with_art_type(site_var.art_type_string)
+        site.art_type_string = art_type_div.select('div > div > a')[0].string
+        site.art_type = self._match_string_with_art_type(site.art_type_string)
 
         files_div = content_div.find('div',
                                      {'class': 'field-name-field-art-files'})
         files_links = files_div.select('a')
-        site_var.files = {link.string: 'http://' + URL_OGA + link['href']
-                          for link in files_links}
+        site.files = {link.string: QUrl.fromEncoded('http://' + URL_OGA + link['href'])
+                      for link in files_links}
+        for key, val in site.files.items():
+            site.files[key] = QUrl(val.queryItemValue('file'))
 
         date_div = content_div.find('div', {'class': 'field-name-post-date'})
-        site_var.date_string = date_div.select('div > div')[0].string
+        site.date_string = date_div.select('div > div')[0].string
 
         body_div = content_div.find('div', {'class': 'field-name-body'})
         body_strings = body_div.select('div p')[0].strings
-        site_var.body = ' '.join(list(body_strings))
-        # for s in self.body.stripped_strings:
-        #     print(s)
-        # print (strings)
+        site.body = ' '.join(list(body_strings))
 
-        return site_var
+        return site
 
     @staticmethod
     def _match_string_with_art_type(string):

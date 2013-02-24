@@ -1,5 +1,8 @@
 *.py[cod]
 
+# Downloads folder is for testing
+downloads/**
+
 # C extensions
 *.so
 
