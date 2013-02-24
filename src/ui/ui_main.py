@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Thu Feb 21 20:53:37 2013
+# Created: Sun Feb 24 19:25:11 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -129,6 +129,7 @@ class Ui_MainWindow(object):
         self.lbl_static_licenses.setObjectName(_fromUtf8("lbl_static_licenses"))
         self.verticalLayout_2.addWidget(self.lbl_static_licenses)
         self.list_licenses = QtGui.QListWidget(self.verticalLayoutWidget_2)
+        self.list_licenses.setFocusPolicy(QtCore.Qt.NoFocus)
         self.list_licenses.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.list_licenses.setResizeMode(QtGui.QListView.Adjust)
         self.list_licenses.setObjectName(_fromUtf8("list_licenses"))

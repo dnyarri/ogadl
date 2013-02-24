@@ -260,6 +260,9 @@
       </item>
       <item>
        <widget class="QListWidget" name="list_licenses">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::NoSelection</enum>
         </property>

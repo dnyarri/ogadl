@@ -44,7 +44,7 @@ class ContentSite(object):
     def get_author(self):
         return self.author
 
-    def get_art_type_string(self):
+    def get_art_type_str(self):
         return self.art_type_string
 
     def get_date_string(self):

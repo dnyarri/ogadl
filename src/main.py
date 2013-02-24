@@ -25,6 +25,7 @@ from PyQt4 import QtCore, QtNetwork
 from PyQt4.QtNetwork import QNetworkReply
 
 import content_scraper
+import info_gen
 
 
 class MyApp(QMainWindow, ui_main.Ui_MainWindow):
@@ -36,14 +37,18 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         """
         QMainWindow.__init__(self)
         ui_main.Ui_MainWindow.__init__(self)
+        self.setupUi(self)
+        self.linein_url.setFocus()
         self.scraper = content_scraper.ContentScraper()
         self.sites = {}
         self.active_site = None
-        self.setupUi(self)
+
         self.manager = QtNetwork.QNetworkAccessManager()
         self.replies = []
         self.current_path = None
         self.setup_signal_slots()
+        self.info_gen = info_gen.InfoGenerator()
+        self.info_gen.read_template('../info_template.txt')
 
 
     def setup_signal_slots(self):
@@ -61,7 +66,7 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
 
         self.lbl_title.setText(self.active_site.get_title())
         self.lbl_author.setText(self.active_site.get_author())
-        self.lbl_art_type.setText(self.active_site.get_art_type_string())
+        self.lbl_art_type.setText(self.active_site.get_art_type_str())
         self.lbl_date.setText(self.active_site.get_date_string())
         self.lbl_description.setText(self.active_site.get_body())
 
@@ -75,36 +80,32 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         selected = [selection.text() for selection in selected]
 
         urls = [self.active_site.get_files()[sel] for sel in selected]
-
-
-        # TODO: Enable this stuff later
+        site = self.active_site
+        info_text = self.info_gen.make_info(title=site.get_title(),
+                                            author=site.get_author(),
+                                            body=site.get_body(),
+                                            file_names=selected,
+                                            art_type=site.get_art_type_str())
 
         self.current_path = QFileDialog.getExistingDirectory(self,
                                                              caption='Choose save folder',
                                                              directory='.')
+        info_file = QFile(self.current_path + '/' + site.get_title() + '.info')
         if self.current_path:
-            info_file = QFile(self.current_path + "/info")
+            # info_file = QFile(self.current_path + "/info")
+            if QFile.exists(self.current_path):
+                # TODO: Ask if user wants to replace old info
+                pass
             if not info_file.open(QFile.WriteOnly | QFile.Text):
                 QMessageBox.information(self, self.tr("Something"),
                                         self.tr("Could not open or create info"
                                         "file for editing"))
                 info_file = None
             else:
-                # out = QTextStream(info_file)
-                # out << "Title: " << scraper.get_title() \
-                #     << "\nAuthor: " << scraper.get_author() \
-                #     << "\nArt type: " <<
-                #     scraper.get_art_type_string()
-                pass
-        else:
-            print(self.current_path)
+                info_file.write(info_text)
+                info_file.close()
 
-
-
-        print(urls)
         for url in urls:
-
-
             request = QtNetwork.QNetworkRequest(url)
             reply = self.manager.get(request)
             # self.replies.append(reply)
@@ -113,6 +114,8 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
             # loop.exec_()
 
             # TODO: Add signal for error cases
+
+
 
 
     def download_finished(self):
@@ -130,7 +133,7 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         if QFile.exists(file_name):
             print("File exists")
             # TODO: Add better notification
-            out_file = QFile(file_name)
+            # out_file = QFile(file_name)
         if not out_file.open(QIODevice.WriteOnly):
             out_file = None
             print("Failed to open file")
