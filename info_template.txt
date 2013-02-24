@@ -1,0 +1,23 @@
+$title
+==========
+
+Author: ${author}
+Art type: ${art_type}
+
+
+Licenses: ${licenses}
+
+
+Files downloaded:
+
+${file_names}
+
+
+Description:
+
+${body}
+
+
+Attribution instructions:
+
+${attr_instructions}
