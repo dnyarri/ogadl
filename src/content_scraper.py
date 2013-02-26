@@ -65,6 +65,9 @@ class ContentScraper(object):
         site.art_type_string = art_type_div.select('div > div > a')[0].string
         site.art_type = self._match_string_with_art_type(site.art_type_string)
 
+        license_divs = content_div.find_all('div', {'class': 'license-name'})
+        site.licenses = [lic_div.string for lic_div in license_divs]
+
         files_div = content_div.find('div',
                                      {'class': 'field-name-field-art-files'})
         files_links = files_div.select('a')

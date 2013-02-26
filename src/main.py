@@ -70,6 +70,9 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         self.lbl_date.setText(self.active_site.get_date_string())
         self.lbl_description.setText(self.active_site.get_body())
 
+        for lic in self.active_site.get_licenses():
+            self.list_licenses.addItem(lic)
+
         for f in self.active_site.get_files().keys():
             self.list_files.addItem(f)
 
@@ -84,8 +87,9 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         info_text = self.info_gen.make_info(title=site.get_title(),
                                             author=site.get_author(),
                                             body=site.get_body(),
-                                            file_names=selected,
-                                            art_type=site.get_art_type_str())
+                                            art_type=site.get_art_type_str(),
+                                            licenses=site.get_licenses(),
+                                            file_names=selected)
 
         self.current_path = QFileDialog.getExistingDirectory(self,
                                                              caption='Choose save folder',

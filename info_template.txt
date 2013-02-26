@@ -5,7 +5,9 @@ Author: ${author}
 Art type: ${art_type}
 
 
-Licenses: ${licenses}
+Licenses: 
+
+${licenses}
 
 
 Files downloaded:

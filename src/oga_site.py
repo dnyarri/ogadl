@@ -55,3 +55,6 @@ class ContentSite(object):
 
     def get_files(self):
         return self.files
+
+    def get_licenses(self):
+        return self.licenses
