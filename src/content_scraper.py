@@ -73,8 +73,9 @@ class ContentScraper(object):
         files_links = files_div.select('a')
         site.files = {link.string: QUrl.fromEncoded('http://' + URL_OGA + link['href'])
                       for link in files_links}
+
         for key, val in site.files.items():
-            site.files[key] = QUrl(val.queryItemValue('file'))
+            site.files[key] = QUrl.fromEncoded(val.queryItemValue('file'))
 
         date_div = content_div.find('div', {'class': 'field-name-post-date'})
         site.date_string = date_div.select('div > div')[0].string
@@ -82,6 +83,11 @@ class ContentScraper(object):
         body_div = content_div.find('div', {'class': 'field-name-body'})
         body_strings = body_div.select('div p')[0].strings
         site.body = ' '.join(list(body_strings))
+
+        attr_instruction_div = content_div.find(
+            'div', {'class': 'field-name-field-art-attribution'})
+        if attr_instruction_div:
+            site.attr_instructions = attr_instruction_div.select('div > div')[0].string
 
         return site
 

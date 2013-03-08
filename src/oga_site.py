@@ -27,7 +27,7 @@ class ContentSite(object):
         self.date_string = ""
         self.date = None
         self.body = ""
-        self.attr_instructions = ""
+        self.attr_instructions = "No specific instructions given"
         self.art_type = -1
         self.art_type_string = ""
         self.tags = []
@@ -58,3 +58,6 @@ class ContentSite(object):
 
     def get_licenses(self):
         return self.licenses
+
+    def get_attr_instructions(self):
+        return self.attr_instructions

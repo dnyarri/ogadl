@@ -64,16 +64,17 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         self.sites[site.title] = site
         self.active_site = site
 
-        self.lbl_title.setText(self.active_site.get_title())
-        self.lbl_author.setText(self.active_site.get_author())
-        self.lbl_art_type.setText(self.active_site.get_art_type_str())
-        self.lbl_date.setText(self.active_site.get_date_string())
-        self.lbl_description.setText(self.active_site.get_body())
+        self.lbl_title.setText(site.get_title())
+        self.lbl_author.setText(site.get_author())
+        self.lbl_art_type.setText(site.get_art_type_str())
+        self.lbl_date.setText(site.get_date_string())
+        self.lbl_description.setText(site.get_body())
+        self.lbl_attribution.setText(site.get_attr_instructions())
 
-        for lic in self.active_site.get_licenses():
+        for lic in site.get_licenses():
             self.list_licenses.addItem(lic)
 
-        for f in self.active_site.get_files().keys():
+        for f in site.get_files().keys():
             self.list_files.addItem(f)
 
     def download_selected(self):
@@ -81,12 +82,13 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         """
         selected = self.list_files.selectedItems()
         selected = [selection.text() for selection in selected]
-
-        urls = [self.active_site.get_files()[sel] for sel in selected]
         site = self.active_site
+        urls = [site.get_files()[sel] for sel in selected]
+
         info_text = self.info_gen.make_info(title=site.get_title(),
                                             author=site.get_author(),
                                             body=site.get_body(),
+                                            attr_instructions=site.get_attr_instructions(),
                                             art_type=site.get_art_type_str(),
                                             licenses=site.get_licenses(),
                                             file_names=selected)
@@ -96,7 +98,6 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
                                                              directory='.')
         info_file = QFile(self.current_path + '/' + site.get_title() + '.info')
         if self.current_path:
-            # info_file = QFile(self.current_path + "/info")
             if QFile.exists(self.current_path):
                 # TODO: Ask if user wants to replace old info
                 pass
@@ -112,15 +113,9 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         for url in urls:
             request = QtNetwork.QNetworkRequest(url)
             reply = self.manager.get(request)
-            # self.replies.append(reply)
-            # loop = QEventLoop()
             reply.finished.connect(self.download_finished)
-            # loop.exec_()
 
             # TODO: Add signal for error cases
-
-
-
 
     def download_finished(self):
         """
@@ -137,13 +132,13 @@ class MyApp(QMainWindow, ui_main.Ui_MainWindow):
         if QFile.exists(file_name):
             print("File exists")
             # TODO: Add better notification
-            # out_file = QFile(file_name)
         if not out_file.open(QIODevice.WriteOnly):
             out_file = None
             print("Failed to open file")
             # TODO: Add better notification
 
         out_file.write(reply.readAll())
+        out_file.close()
         reply.deleteLater()
 
 

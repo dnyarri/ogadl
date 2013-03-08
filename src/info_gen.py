@@ -44,7 +44,7 @@ class InfoGenerator(object):
         # if not f.open(QIODevice.ReadOnly | QIODevice.Text):
         #     # TODO: Show messagebox
         #     return
-        with open(path) as f:
+        with open(path, 'r') as f:
             self.template = string.Template(f.read())
 
 
@@ -61,11 +61,14 @@ class InfoGenerator(object):
         values['file_names'] = '\n'.join(file_names)
         values['body'] = textwrap.fill(kwargs.get('body', 'No description'),
                                        width=LINE_LENGTH)
-        attr_instructions = kwargs.get('attr_instructions', 'No specific instructions')
+        attr_instructions = kwargs.get('attr_instructions', '')
+        attr_instructions = attr_instructions if attr_instructions else \
+                            'No specific attribution instructions'
+        print (attr_instructions)
         values['attr_instructions'] = textwrap.fill(attr_instructions,
                                                     width=LINE_LENGTH)
         values['art_type'] = kwargs.get('art_type', 'Not specified')
-        licenses = kwargs.get('licenses', ['License reading not implemented'])
+        licenses = kwargs.get('licenses', ['Unlicensed? Most likely error..'])
         values['licenses'] = '\n'.join(licenses)
 
         result = self.template.substitute(values)
