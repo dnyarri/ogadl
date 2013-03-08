@@ -41,9 +41,7 @@ class ContentScraper(object):
         """ Reads data from website and saves them to variables which you can
         get by using corresponding method.
         """
-        if url.startswith('http://'):
-            url = url
-        else:
+        if not url.startswith('http://'):
             url = 'http://' + url
 
         page_response = urllib.request.urlopen(url)
